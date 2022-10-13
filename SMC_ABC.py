@@ -33,7 +33,7 @@ class SMC_ABC_method(object):
 
         for i in range(self.N):
             part_vals[i] = self.prior_sampler()
-            part_sim[i] 
+            part_sim[i]
 
 
 
