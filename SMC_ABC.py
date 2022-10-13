@@ -25,9 +25,13 @@ class SMC_ABC_method(object):
         dist = np.sum(((np.log(x)) - np.log(y))**2)
         return dist
 
-    def trans_f(self):
-
-        return None
+    def trans_f(self,theta):
+        transf = np.zeros(self.num_params)
+        transf[0] = np.log(theta[0]/(1-np.log(theta[0])))
+        transf[1] = np.log(theta[1]/(1-np.log(theta[1])))
+        transf[2] = np.log(theta[2]/30)
+        transf[3] = np.log(theta[3]/160)
+        return transf
 
     def smc_abc_rw(self):
         part_obs = self.y
@@ -51,4 +55,6 @@ class SMC_ABC_method(object):
         sims_history = self.N
 
         for i in range(self.N):
-            part_vals[i]
+            part_vals[i] = self.trans_f(part_vals[i])
+
+        
