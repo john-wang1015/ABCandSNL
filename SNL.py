@@ -1,13 +1,14 @@
 import numpy as np
 import pandas as pd
+from simulator import Simulator
 import torch
 _ = torch.manual_seed(10)
 import os
-from sbi.utils import process_prior
 import math
-from sbi import utils as utils
+
 import sbi
-from sbi import inference
+from sbi.utils import process_prior
+from sbi import utils as utils
 from sbi.inference import SNPE, prepare_for_sbi, simulate_for_sbi
 from sbi.utils import process_prior
 
@@ -61,3 +62,15 @@ class CustomPriorDist(object):
             log_probs[i] =  torch.sum(temp)
 
         return log_probs.numpy() if self.return_numpy else log_probs
+
+class Wrap_Data(object):
+    def __init__(self, theta):
+        self.theta = theta
+
+
+    def processing(self):
+        theta = torch.from_numpy(self.theta).to(torch.float32)
+        x = torch.from_numpy(self.simulation).to(torch.float32)
+        x_0 = torch.from_numpy(self.observation).to(torch.float32)
+        return theta,x,x_0
+
