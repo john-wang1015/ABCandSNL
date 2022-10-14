@@ -8,7 +8,7 @@ class Params
 {
 private:
     std::random_device rd;
-    std::mt19937 generator{ rd() };
+    //std::mt19937 generator{ rd() };
 
 public:
     //int created, opportunities;
@@ -27,7 +27,7 @@ public:
 
     double RandomDouble()
     {
-        return uniform_random(generator);
+        return uniform_random(rd);
     }
 
     bool WithProbability(double prob)

@@ -1,5 +1,8 @@
 #include "Model.h"
+#include <iostream>
+#include <Vector>
 
+extern "C" {
 Pancreas* SeedAndGrowToStartVolume(double p0, double psc, int dmax, int gage, int page, double startVolume)
 {
 	Params* parameters = new Params(p0, psc, dmax, gage, page);
@@ -18,6 +21,7 @@ Pancreas* SeedAndGrowToStartVolume(double p0, double psc, int dmax, int gage, in
 	return pancreas;
 }
 
+
 Pancreas* CreateNewParticle(double p0, double psc, int dmax, int gage, int page, Pancreas* pancreas)
 {
 	return pancreas->CreateNewParticle(new Params(p0, psc, dmax, gage, page));
@@ -26,4 +30,22 @@ Pancreas* CreateNewParticle(double p0, double psc, int dmax, int gage, int page,
 void UpdateParticle(double p0, double psc, int dmax, int gage, int page, Pancreas* pancreas)
 {
     pancreas->UpdateParameters(new Params(p0, psc, dmax, gage, page));
+}
+
+void TumourGrowthData(double* input, double p0, double psc, int dmax, int gage, int page, double startVolume, int days){
+	Pancreas* pancreas = SeedAndGrowToStartVolume(p0, psc, dmax, gage, page,startVolume);
+	
+	for (int i = 0; i < days; i++)
+	{
+		pancreas->SimulateOneDay(1);
+		input[i]=pancreas->TumourVolume();
+		//output.push_back(pancreas->SimulateOneDay(1));
+	}
+	
+}
+
+
+void test(){
+	std::cout << "Test";
+}
 }
