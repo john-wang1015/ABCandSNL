@@ -11,7 +11,7 @@ class SMC_ABC_method(object):
         self.dist_final = dist_final
         self.a = a
         self.c = c
-        self.p_acc_min
+        self.p_acc_min = p_acc_min
 
     def prior_sampler(self):
         sampler = np.zeros(self.num_params)
@@ -46,8 +46,8 @@ class SMC_ABC_method(object):
 
         for i in range(self.N):
             part_vals[i] = self.prior_sampler()
-            part_sim[i] = Simulator.Tumourgrowth(part_vals[i][0],part_vals[i][1],part_vals[i][2],part_vals[i][3],
-                                                 2,part_obs[0],days)
+            part_sim[i] = Simulator(part_vals[i][0],part_vals[i][1],part_vals[i][2],part_vals[i][3],
+                                                 2,part_obs[0],days).Tumourgrowth()
             part_s[i] =self.dist_function(part_obs, part_sim[i])
 
         sims = self.N
@@ -57,4 +57,18 @@ class SMC_ABC_method(object):
         for i in range(self.N):
             part_vals[i] = self.trans_f(part_vals[i])
 
-        
+        ix = np.argsort(part_s)
+        part_s = np.sort(part_s)
+        part_vals = part_vals[ix]
+        part_sim = part_sim[ix]
+
+        dist_max = part_s[self.N]
+        dist_next = part_s[num_keep]
+        dist_final = dist_next
+        print(dist_max,dist_next,dist_final)
+        dist_t = dist_next
+        p_acc_t = 0
+
+        while (dist_max > dist_final):
+            cov_matrix = (2.38**2)*np.cov(part_vals[0:num_keep])/self.num_params
+

@@ -9,7 +9,7 @@ import math
 import sbi
 from sbi.utils import process_prior
 from sbi import utils as utils
-from sbi.inference import SNPE, prepare_for_sbi, simulate_for_sbi
+from sbi.inference import SNLE, prepare_for_sbi, simulate_for_sbi
 from sbi.utils import process_prior
 
 class CustomPriorDist(object):
@@ -66,7 +66,7 @@ class CustomPriorDist(object):
 class Wrap_Data(object):
     def __init__(self, theta):
         self.theta = theta
-
+        
 
     def processing(self):
         theta = torch.from_numpy(self.theta).to(torch.float32)
