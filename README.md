@@ -32,11 +32,11 @@ If you find the code useful for your research, please consider citing
 - For VCBM
 ```bib
     @article{jenner2022examining,
-      title={Examining the efficacy of localised gemcitabine therapy for the treatment of pancreatic cancer using a hybrid agent-based model},
-      author={Jenner, Adrianne and Kelly, Wayne and Dallaston, Michael and Araujo, Robyn and Parfitt, Isobelle and Steinitz, Dominic and Pooladvand, Pantea and Kim, Peter S and Wade, Samantha J and Vine, Kara L},
-      journal={bioRxiv},
-      year={2022},
-      publisher={Cold Spring Harbor Laboratory}
+    title={Examining the efficacy of localised gemcitabine therapy for the treatment of pancreatic cancer using a hybrid agent-based model},
+    author={Jenner, Adrianne and Kelly, Wayne and Dallaston, Michael and Araujo, Robyn and Parfitt, Isobelle and Steinitz, Dominic and Pooladvand, Pantea and Kim, Peter S and Wade, Samantha J and Vine, Kara L},
+    journal={bioRxiv},
+    year={2022},
+    publisher={Cold Spring Harbor Laboratory}
 ```
 
 This work is an extension of 
