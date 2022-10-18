@@ -30,8 +30,8 @@ class SMC_ABC_method(object):
         sampler = np.zeros(self.num_params)
         sampler[0] = beta(1,1)
         sampler[1] = beta(1,1e5)
-        sampler[2] = np.exp( np.log(30) + normal(0,1))
-        sampler[2] = np.exp( np.log(160) + normal(0,1))
+        sampler[2] = np.exp(np.log(30) + normal(0,1))
+        sampler[3] = np.exp(np.log(160) + normal(0,1))
         return sampler
 
     def dist_function(self,x,y):
@@ -61,7 +61,7 @@ class SMC_ABC_method(object):
     def smc_abc_rw(self):
         part_obs = self.y
         num_drop = np.floor(self.N * self.a)
-        num_keep = self.N - num_drop
+        num_keep = int(self.N - num_drop)
         mcmc_trials = 5
         days = len(part_obs)
 
@@ -71,37 +71,39 @@ class SMC_ABC_method(object):
 
         for i in range(self.N):
             part_vals[i] = self.prior_sampler()
-            part_sim[i] = Simulator(part_vals[i][0],part_vals[i][1],part_vals[i][2],part_vals[i][3],
-                                                 2,part_obs[0],days).Tumourgrowth()
+            part_sim[i] = Simulator(part_vals[i][0],part_vals[i][1],part_vals[i][2].astype(np.int64),part_vals[i][3].astype(np.int64),2,part_obs[0],days).Tumourgrowth()
             part_s[i] =self.dist_function(part_obs, part_sim[i])
 
         sims = self.N
-        dist_history = max(part_s)
-        sims_history = self.N
+        dist_history = [max(part_s)]
+        sims_history = [self.N]
 
         for i in range(self.N):
             part_vals[i] = self.trans_f(part_vals[i])
 
         ix = np.argsort(part_s)
-        part_s = np.sort(part_s)
+        part_s = np.sort(part_s).reshape(len(part_s))
         part_vals = part_vals[ix]
         part_sim = part_sim[ix]
 
-        dist_max = part_s[self.N]
-        dist_next = part_s[num_keep]
+        print(part_s)
+        print(num_keep)
+        dist_max = part_s[self.N-1]
+        dist_next = part_s[num_keep-1]
         dist_final = dist_next
         print(dist_max,dist_next,dist_final)
         dist_t = dist_next
         p_acc_t = 0
 
         while (dist_max > dist_final):
+            print('flag')
             cov_matrix = (2.38**2)*np.cov(part_vals[0:num_keep])/self.num_params
 
             # resample
             r = np.random.choice(num_keep, self.N - num_keep)
-            part_vals[(num_keep+1):self.N] = part_vals[r]
-            part_s[(num_keep+1):self.N] = part_s[r]
-            part_sim[(num_keep+1):self.N] = part_sim[r]
+            part_vals[(num_keep+1):] = part_vals[r]
+            part_s[(num_keep+1):] = part_s[r]
+            part_sim[(num_keep+1):] = part_sim[r]
 
             i_acc = np.zeros(self.N-num_keep)
             sims_mcmc = np.zeros(self.N-num_keep)
@@ -120,7 +122,7 @@ class SMC_ABC_method(object):
                         continue
 
                     prop = self.trans_finv(part_vals_prop)
-                    part_sim_prop = Simulator(prop[0],prop[1],prop[2],prop[3],2,part_obs[0],days).Tumourgrowth()
+                    part_sim_prop = Simulator(prop[0],prop[1],prop[2].astype(np.int64),prop[3].astype(np.int64),2,part_obs[0],days).Tumourgrowth()
                     dist_prop = self.dist_function(part_obs,part_sim_prop)
                     sum_of_dist_propr = sum_of_dist_propr + dist_prop
 
@@ -150,7 +152,7 @@ class SMC_ABC_method(object):
                         continue
 
                     prop = self.trans_finv(part_vals_prop)
-                    part_sim_prop = Simulator(prop[0],prop[1],prop[2],prop[3],2,part_obs[0],days).Tumourgrowth()
+                    part_sim_prop = Simulator(prop[0],prop[1],prop[2].astype(np.int64),prop[3].astype(np.int64),2,part_obs[0],days).Tumourgrowth()
                     dist_prop = self.dist_function(part_obs,part_sim_prop)
                     sum_of_dist_propr = sum_of_dist_propr + dist_prop
 
@@ -170,5 +172,28 @@ class SMC_ABC_method(object):
             mcmc_trials = np.ceil(mcmc_iters/2)
             print("The number of unique particles is {:d}\n".format(len(np.unique(part_vals.T[0]))))
 
-            
+            ix = np.argsort(part_s)
+            part_s = np.sort(part_s)
+            part_vals = part_vals[ix]
+            part_sim = part_sim[ix]
 
+            dist_t = dist_next
+            p_acc_t = p_acc
+
+            dist_max = part_s[self.N]
+            dist_next = part_s[num_keep]
+
+            if (dist_next < dist_final):
+                dist_next = dist_final
+
+            print('The next distance is {:d} and the maximum distance is {:d} and the number to drop is {:d}\n'.format(dist_next,dist_max,num_drop))
+            print('The number of sims is {:d}\n'.format(sims))
+
+            dist_history.append(max(part_s))
+            sims_history.append(sims)
+
+            if p_acc < self.p_acc_min:
+                print('Getting out as MCMC acceptance rate is below acceptable threshold\n')
+                return part_vals, part_sim, part_s, sims,dist_t,p_acc_t,dist_history,sims_history
+
+        return part_vals, part_sim, part_s, sims,dist_t,p_acc_t,dist_history,sims_history

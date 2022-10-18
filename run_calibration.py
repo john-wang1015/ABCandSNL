@@ -5,22 +5,21 @@ import torch
 import math
 import os
 
-
 from simulator import Simulator
 from SMC_ABC import SMC_ABC_method
 import SNL
 
 ## do parallel programming for simulated data
-'''
-for i in range(10000):
-    a = Simulator(0.1, 0.0001, 100, 160, 2, 200, 32).Tumourgrowth()
-    if i % 1000 == 0:
-        print(i)
-        print(a)
-    print(i)
-'''
+y =Simulator(0.1, 0.0001, 100, 160, 2, 200, 7).Tumourgrowth()
+sim_params = [2,32,200]
+num_params = 4
+N = 10
+dist_final = 0
+a = 0.5
+c = 0.01
+p_acc_min = 0.5
 
-print("Number of cpu: ", multiprocessing.cpu_count())
+smcabc = SMC_ABC_method(y,sim_params,num_params,N,dist_final,a,c,p_acc_min).smc_abc_rw()
 
 
 
