@@ -24,6 +24,9 @@ class Simulator(object):
 
         return data
 
-##if __name__ == "__main__":
-##    simulator = Simulator(0.1, 0.0001, 100, 160, 2, 200, 32)
-##    print(simulator.Tumourgrowth())
+if __name__ == "__main__":
+    '''
+        A test for simulator
+    '''
+    simulator = Simulator(0.1, 0.0001, 100, 160, 2, 200, 32)
+    print(simulator.Tumourgrowth())

@@ -1,9 +1,22 @@
 import numpy as np
 from numpy.random import beta,normal
 from simulator import Simulator
+import scipy
 
 class SMC_ABC_method(object):
     def __init__(self, y, sim_params, num_params, N, dist_final, a, c, p_acc_min):
+        '''
+        :param y:               the observation data with the length equal to value of max_time
+        :param sim_params:      a 1*3 vector contains value for page, max_time and starting Volume.
+        :param num_params:      number of parameters the model have.
+        :param N:               number of particle.
+        :param dist_final:      target discrepancy threshold. If zero, then p_acc_min is used to determine stopping
+                                criteria.
+        :param a:               tuning parameter for adaptive selection of discrepancy threshold sequence.
+        :param c:               tuning parameter for choosing the number of MCMC iterations in move step.
+        :param p_acc_min:       minimum acceptable acceptance rate in the MCMC interations. If zero the dist_final
+                                is used to determine stopping criteria.
+        '''
         self.y = y
         self.sim_params = sim_params
         self.num_params = num_params
@@ -32,6 +45,11 @@ class SMC_ABC_method(object):
         transf[2] = np.log(theta[2]/30)
         transf[3] = np.log(theta[3]/160)
         return transf
+
+    def pdf(self,theta_trans):
+        theta_pdf = np.prod(scipy.stats.beta.pdf(np.exp(theta_trans[0:2]/(1+ np.exp(theta_trans[0:2]))), a = [1,1], b = [1,1e5])
+                            * np.exp( ))
+        return theta_pdf
 
     def smc_abc_rw(self):
         part_obs = self.y
@@ -71,4 +89,16 @@ class SMC_ABC_method(object):
 
         while (dist_max > dist_final):
             cov_matrix = (2.38**2)*np.cov(part_vals[0:num_keep])/self.num_params
+
+            # resample
+            r = np.random.choice(num_keep, self.N - num_keep)
+            part_vals[(num_keep+1):self.N] = part_vals[r]
+            part_s[(num_keep+1):self.N] = part_s[r]
+            part_sim[(num_keep+1):self.N] = part_sim[r]
+
+            i_acc = np.zeros(self.N-num_keep)
+            sims_mcmc = np.zeros(self.N-num_keep)
+
+            for i in range(num_keep+1,self.N):
+                part_vals_prop = np.random.multivariate_normal(part_vals[i],cov_matrix)
 
