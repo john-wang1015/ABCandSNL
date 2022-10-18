@@ -134,7 +134,41 @@ class SMC_ABC_method(object):
 
             acc_rate = np.sum(i_acc)/(mcmc_trials*(self.N-num_keep))
             mcmc_iters = np.floor(np.log(self.c)/np.log(1-acc_rate)+1)
-            print("Total number of mcmc moves for current target is {:d}, number remaining is {:d}".format(mcmc_iters,mcmc_iters-mcmc_trials))
+            print("Total number of mcmc moves for current target is {:d}, number remaining is {:d}\n".format(mcmc_iters,mcmc_iters-mcmc_trials))
 
+            for i in range(num_keep+1,self.N):
+                sum_of_dist_propr = 0
+                for r in range(mcmc_iters - mcmc_trials):
+                    part_vals_prop = np.random.multivariate_normal(part_vals[i],cov_matrix)
+                    prior_curr = self.pdf(part_vals[i])
+                    prior_prop = self.pdf(part_vals_prop)
 
+                    if (np.isnan(prior_prop/prior_curr) or np.random.rand > prior_prop/prior_curr):
+                        continue
+
+                    if sum_of_dist_propr <= dist_max:
+                        continue
+
+                    prop = self.trans_finv(part_vals_prop)
+                    part_sim_prop = Simulator(prop[0],prop[1],prop[2],prop[3],2,part_obs[0],days).Tumourgrowth()
+                    dist_prop = self.dist_function(part_obs,part_sim_prop)
+                    sum_of_dist_propr = sum_of_dist_propr + dist_prop
+
+                    sims_mcmc[i-num_keep] = sims_mcmc[i-num_keep]+1
+
+                    if dist_prop <= dist_next:
+                        part_vals[i] = part_vals_prop
+                        part_s[i] = dist_prop
+                        part_sim[i] = part_sim_prop
+                        i_acc[i-num_keep] = i_acc[i-num_keep] + 1
+
+            num_mcmc_iters = max(0, mcmc_iters - mcmc_trials) + mcmc_trials
+            p_acc = sum(i_acc)/(num_mcmc_iters*(self.N - num_keep))
+            print("MCMC acceptance probability was {:d}\n".format(p_acc))
+
+            sims = sims + sum(sims_mcmc)
+            mcmc_trials = np.ceil(mcmc_iters/2)
+            print("The number of unique particles is {:d}\n".format(len(np.unique(part_vals.T[0]))))
+
+            
 
