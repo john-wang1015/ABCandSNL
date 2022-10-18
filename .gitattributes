@@ -1,2 +1,3 @@
 * linguist-vendored
-*.C++ linguist-vendored=false
+*.Python linguist-vendored=true
+
