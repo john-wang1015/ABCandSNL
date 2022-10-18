@@ -22,11 +22,6 @@ In this work, we use sequential Monte Carlo - approximate Bayeisan computation (
 
 
 
-## How to run the code
-
-
-
-
 
 ## Tips
 
@@ -44,7 +39,7 @@ If you find the code useful for your research, please consider citing
       publisher={Cold Spring Harbor Laboratory}
 ```
 
-This work is extended by 
+This work is an extension of 
 ```bib
   @article{wang2022calibration,
   title={Calibration of a Voronoi cell-based model for tumour growth using approximate Bayesian computation},
