@@ -1,3 +1,18 @@
+'''
+Sequential Monte Carlo - approximate Bayesian computation (SMC-ABC) replenishment algorithm
+
+This Python implementation is adapt from C. C. Drovandi and A. N. Pettitt. Estimation of parameters for macroparasite
+population evolution using approximate Bayesian computation.
+
+Return:
+    :param part_val:    parameter values for each particle
+    :param part_sim:    summary statistics for each particle
+    :param part_c:      discrepancy metric value for each particle
+    :param sim:         total number of model simulations performed
+    :param dist_t:      smallest discrepacy threshold reached
+    :param p_acc_min:   smallest MCMC acceptance rate reached
+'''
+
 import numpy as np
 from numpy.random import beta,normal
 from simulator import Simulator
@@ -6,6 +21,7 @@ import scipy
 class SMC_ABC_method(object):
     def __init__(self, y, sim_params, num_params, N, dist_final, a, c, p_acc_min):
         '''
+        Input:
         :param y:               the observation data with the length equal to value of max_time
         :param sim_params:      a 1*3 vector contains value for page, max_time and starting Volume.
         :param num_params:      number of parameters the model have.
@@ -27,6 +43,10 @@ class SMC_ABC_method(object):
         self.p_acc_min = p_acc_min
 
     def prior_sampler(self):
+        '''
+            Return:
+                :param sampler:     Sampler from prior distribution
+        '''
         sampler = np.zeros(self.num_params)
         sampler[0] = beta(1,1)
         sampler[1] = beta(1,1e5)
@@ -86,8 +106,7 @@ class SMC_ABC_method(object):
         part_vals = part_vals[ix]
         part_sim = part_sim[ix]
 
-        print(part_s)
-        print(num_keep)
+
         dist_max = part_s[self.N-1]
         dist_next = part_s[num_keep-1]
         dist_final = dist_next

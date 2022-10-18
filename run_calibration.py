@@ -9,7 +9,7 @@ from simulator import Simulator
 from SMC_ABC import SMC_ABC_method
 import SNL
 
-## do parallel programming for simulated data
+
 y =Simulator(0.1, 0.0001, 100, 160, 2, 200, 7).Tumourgrowth()
 sim_params = [2,32,200]
 num_params = 4
@@ -19,7 +19,7 @@ a = 0.5
 c = 0.01
 p_acc_min = 0.5
 
-smcabc = SMC_ABC_method(y,sim_params,num_params,N,dist_final,a,c,p_acc_min).smc_abc_rw()
+part_vals, part_sim, part_s, sims,dist_t,p_acc_t,dist_history,sims_history = SMC_ABC_method(y,sim_params,num_params,N,dist_final,a,c,p_acc_min).smc_abc_rw()
 
 
 
