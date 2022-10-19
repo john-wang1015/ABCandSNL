@@ -13,7 +13,7 @@ import SNL
 y =Simulator(0.1, 0.0001, 100, 160, 2, 200, 7).Tumourgrowth()
 sim_params = [2,32,200]
 num_params = 4
-N = 10
+N = 50
 dist_final = 0
 a = 0.5
 c = 0.01

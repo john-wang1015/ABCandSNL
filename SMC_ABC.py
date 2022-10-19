@@ -67,8 +67,12 @@ class SMC_ABC_method(object):
         return transf
 
     def pdf(self,theta_trans):
-        theta_pdf = np.prod(scipy.stats.beta.pdf(np.exp(theta_trans[0:2]/(1+ np.exp(theta_trans[0:2]))), a = [1,1], b = [1,1e5])
-                            * np.exp(theta_trans[0:2]/(1+np.exp(theta_trans[0:2])))**2, scipy.stats.norm.pdf(theta_trans[2:],0,[1,1]))
+        beta_param = scipy.stats.beta.pdf(np.exp(theta_trans[0:2]/(1+ np.exp(theta_trans[0:2]))), a = [1,1], b = [1,1e5]) * np.exp(theta_trans[0:2]/(1+np.exp(theta_trans[0:2])))**2
+        norm_param = scipy.stats.norm.pdf(theta_trans[2:],0,[1,1])
+        prod_pdf = np.zeros(4)
+        prod_pdf[0:2] = beta_param
+        prod_pdf[2:] = norm_param
+        theta_pdf = np.prod(prod_pdf)
         return theta_pdf
 
     def trans_finv(self,theta):
@@ -101,28 +105,26 @@ class SMC_ABC_method(object):
         for i in range(self.N):
             part_vals[i] = self.trans_f(part_vals[i])
 
-        ix = np.argsort(part_s)
+        ix = np.argsort(part_s.reshape(len(part_s)))
         part_s = np.sort(part_s).reshape(len(part_s))
-        part_vals = part_vals[ix]
-        part_sim = part_sim[ix]
-
+        part_vals = np.asarray([part_vals[ix[i]].tolist() for i in range(len(ix))])
+        part_sim = np.asarray([part_sim[ix[i]].tolist() for i in range(len(ix))])
 
         dist_max = part_s[self.N-1]
         dist_next = part_s[num_keep-1]
-        dist_final = dist_next
+        dist_final = self.dist_final
         print(dist_max,dist_next,dist_final)
         dist_t = dist_next
         p_acc_t = 0
 
         while (dist_max > dist_final):
-            print('flag')
-            cov_matrix = (2.38**2)*np.cov(part_vals[0:num_keep])/self.num_params
+            cov_matrix = (2.38**2)*np.cov(part_vals[0:num_keep-1].T)/self.num_params
 
             # resample
             r = np.random.choice(num_keep, self.N - num_keep)
-            part_vals[(num_keep+1):] = part_vals[r]
-            part_s[(num_keep+1):] = part_s[r]
-            part_sim[(num_keep+1):] = part_sim[r]
+            part_vals[(num_keep):] = [part_vals[r[i]] for i in range(len(r))]
+            part_s[(num_keep):] = [part_s[r[i]] for i in range(len(r))]
+            part_sim[(num_keep):] = [part_sim[r[i]] for i in range(len(r))]
 
             i_acc = np.zeros(self.N-num_keep)
             sims_mcmc = np.zeros(self.N-num_keep)
@@ -134,11 +136,11 @@ class SMC_ABC_method(object):
                     prior_curr = self.pdf(part_vals[i])
                     prior_prop = self.pdf(part_vals_prop)
 
-                    if (np.isnan(prior_prop/prior_curr) or np.random.rand > prior_prop/prior_curr):
-                        continue
+                    #if (np.isnan(prior_prop/prior_curr) or np.random.rand() > prior_prop/prior_curr):
+                    #    continue
 
-                    if sum_of_dist_propr <= dist_max:
-                        continue
+                    #if sum_of_dist_propr <= dist_max:
+                    #    continue
 
                     prop = self.trans_finv(part_vals_prop)
                     part_sim_prop = Simulator(prop[0],prop[1],prop[2].astype(np.int64),prop[3].astype(np.int64),2,part_obs[0],days).Tumourgrowth()
@@ -147,6 +149,8 @@ class SMC_ABC_method(object):
 
                     sims_mcmc[i-num_keep] = sims_mcmc[i-num_keep]+1
 
+                    print(dist_prop,dist_next)
+
                     if dist_prop <= dist_next:
                         part_vals[i] = part_vals_prop
                         part_s[i] = dist_prop
@@ -154,7 +158,9 @@ class SMC_ABC_method(object):
                         i_acc[i-num_keep] = i_acc[i-num_keep] + 1
 
             acc_rate = np.sum(i_acc)/(mcmc_trials*(self.N-num_keep))
-            mcmc_iters = np.floor(np.log(self.c)/np.log(1-acc_rate)+1)
+            print(acc_rate)
+            print(np.log(1-acc_rate))
+            mcmc_iters = int(np.floor(np.log(self.c)/np.log(1-acc_rate)+1))
             print("Total number of mcmc moves for current target is {:d}, number remaining is {:d}\n".format(mcmc_iters,mcmc_iters-mcmc_trials))
 
             for i in range(num_keep+1,self.N):
