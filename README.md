@@ -16,7 +16,7 @@ Agent-based models are a class of models that can describe complicated phenomena
 In this work, we use sequential Monte Carlo - approximate Bayeisan computation (SMC-ABC) and sequential neural likelihood method to quantify the uncertainty of the model paramters. 
 
 
-## What to run this code?
+## How to run this code?
 
 
 
