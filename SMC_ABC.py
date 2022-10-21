@@ -149,17 +149,14 @@ class SMC_ABC_method(object):
 
                     sims_mcmc[i-num_keep] = sims_mcmc[i-num_keep]+1
 
-                    print(dist_prop,dist_next)
-
                     if dist_prop <= dist_next:
                         part_vals[i] = part_vals_prop
                         part_s[i] = dist_prop
                         part_sim[i] = part_sim_prop
                         i_acc[i-num_keep] = i_acc[i-num_keep] + 1
 
+            print(i_acc)
             acc_rate = np.sum(i_acc)/(mcmc_trials*(self.N-num_keep))
-            print(acc_rate)
-            print(np.log(1-acc_rate))
             mcmc_iters = int(np.floor(np.log(self.c)/np.log(1-acc_rate)+1))
             print("Total number of mcmc moves for current target is {:d}, number remaining is {:d}\n".format(mcmc_iters,mcmc_iters-mcmc_trials))
 
@@ -170,11 +167,11 @@ class SMC_ABC_method(object):
                     prior_curr = self.pdf(part_vals[i])
                     prior_prop = self.pdf(part_vals_prop)
 
-                    if (np.isnan(prior_prop/prior_curr) or np.random.rand > prior_prop/prior_curr):
-                        continue
+                    #if (np.isnan(prior_prop/prior_curr) or np.random.rand > prior_prop/prior_curr):
+                    #    continue
 
-                    if sum_of_dist_propr <= dist_max:
-                        continue
+                    #if sum_of_dist_propr <= dist_max:
+                    #    continue
 
                     prop = self.trans_finv(part_vals_prop)
                     part_sim_prop = Simulator(prop[0],prop[1],prop[2].astype(np.int64),prop[3].astype(np.int64),2,part_obs[0],days).Tumourgrowth()
@@ -191,7 +188,7 @@ class SMC_ABC_method(object):
 
             num_mcmc_iters = max(0, mcmc_iters - mcmc_trials) + mcmc_trials
             p_acc = sum(i_acc)/(num_mcmc_iters*(self.N - num_keep))
-            print("MCMC acceptance probability was {:d}\n".format(p_acc))
+            print("MCMC acceptance probability was {:.4f}\n".format(p_acc))
 
             sims = sims + sum(sims_mcmc)
             mcmc_trials = np.ceil(mcmc_iters/2)
@@ -205,14 +202,14 @@ class SMC_ABC_method(object):
             dist_t = dist_next
             p_acc_t = p_acc
 
-            dist_max = part_s[self.N]
-            dist_next = part_s[num_keep]
+            dist_max = part_s[self.N-1]
+            dist_next = part_s[num_keep-1]
 
             if (dist_next < dist_final):
                 dist_next = dist_final
 
-            print('The next distance is {:d} and the maximum distance is {:d} and the number to drop is {:d}\n'.format(dist_next,dist_max,num_drop))
-            print('The number of sims is {:d}\n'.format(sims))
+            print('The next distance is {:.4f} and the maximum distance is {:.4f} and the number to drop is {:d}\n'.format(dist_next,dist_max,int(num_drop)))
+            print('The number of sims is {:d}\n'.format(int(sims)))
 
             dist_history.append(max(part_s))
             sims_history.append(sims)
