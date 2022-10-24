@@ -63,10 +63,18 @@ class CustomPriorDist(object):
 
         return log_probs.numpy() if self.return_numpy else log_probs
 
-class Wrap_Data(object):
-    def __init__(self, theta):
+class SNL(object):
+    def __init__(self, theta,n_samples,observation):
         self.theta = theta
-        
+        self.n = n_samples
+        self.observation = observation
+        self.simulation = np.zeros(self.n, len(self.observation))
+
+        for i in range(self.n):
+            self.simulation[i] = Simulator(self.theta[0],self.theta[1],self.theta[2].astype(np.int64),self.theta[3].astype(np.int64),2,self.observation[0],len(self.observation)).Tumourgrowth()
+
+        priorDist = CustomPriorDist(30*torch.ones(1),160*torch.ones(1),torch.zeros(1),torch.ones(1),torch.ones(1)*1e4)
+        self.prior = process_prior(priorDist)[0]
 
     def processing(self):
         theta = torch.from_numpy(self.theta).to(torch.float32)
@@ -74,3 +82,10 @@ class Wrap_Data(object):
         x_0 = torch.from_numpy(self.observation).to(torch.float32)
         return theta,x,x_0
 
+    def infer_and_sanpler(self):
+        inference = sbi.inference.SNLE(prior=self.prior, density_estimator='nsf')
+        theta,x,x_0 = self.processing()
+        density_estimator = inference.append_simulations(theta, x).train()
+        posterior = inference.build_posterior(density_estimator)
+        posterior_samples = posterior.sample((self.n,),x = x_0)
+        return posterior_samples

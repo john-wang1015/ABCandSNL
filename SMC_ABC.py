@@ -48,13 +48,19 @@ class SMC_ABC_method(object):
                 :param sampler:     Sampler from prior distribution
         '''
         sampler = np.zeros(self.num_params)
-        sampler[0] = beta(1,1)
-        sampler[1] = beta(1,1e5)
-        sampler[2] = np.exp(np.log(30) + normal(0,1))
-        sampler[3] = np.exp(np.log(160) + normal(0,1))
+        sampler[0] = beta(1,1)                                  # p_0 ~ Beta(1,1)
+        sampler[1] = beta(1,1e5)                                # p_psc ~ Beta(1,1e5)
+        sampler[2] = np.exp(np.log(30) + normal(0,1))           # d_max ~ epx(log(30) + z), z ~ N(0,1)
+        sampler[3] = np.exp(np.log(160) + normal(0,1))          # g_age ~ epx(log(160) + z), z ~ N(0,1)
         return sampler
 
     def dist_function(self,x,y):
+        '''
+        :param x:   simulated data
+        :param y:   observed data
+        :return:
+            distance between x and y
+        '''
         dist = np.sum(((np.log(x)) - np.log(y))**2)
         return dist
 
@@ -82,7 +88,7 @@ class SMC_ABC_method(object):
         finv[3] = np.exp(np.log(160) + theta[3])
         return finv
 
-    def smc_abc_rw(self):
+    def Sampler(self):
         part_obs = self.y
         num_drop = np.floor(self.N * self.a)
         num_keep = int(self.N - num_drop)
