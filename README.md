@@ -16,13 +16,6 @@ Agent-based models are a class of models that can describe complicated phenomena
 In this work, we use sequential Monte Carlo - approximate Bayeisan computation (SMC-ABC) and sequential neural likelihood method to quantify the uncertainty of the model paramters. 
 
 
-## How to run this code?
-
-
-
-
-
-
 ## Tips
 The VCBM is compiling under the MacOS, and it works for `MacOS` and `Linux` users. If you are a Windows user, you need to re-compile the `Model.cpp` to a `.so` file and replace `Model.so` in VCBM folder to your `.so` file. The simulation for `SMC-ABC` requires huge amount of memory so parallel computing in personal device is not recommend. If you require to use parallel computing, you need to use HPC or similar to run the code.
 
