@@ -1,3 +1,5 @@
+// The code to simulate the VCBM originates from Examining the efficacy of localised gemcitabine therapy 
+// for the treatment of pancreatic cancer using a hybrid agent-based model
 #include "Model.h"
 #include <iostream>
 #include <Vector>
