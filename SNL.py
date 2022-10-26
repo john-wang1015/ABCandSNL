@@ -1,13 +1,10 @@
 import numpy as np
-import pandas as pd
 from simulator import Simulator
 import torch
 _ = torch.manual_seed(10)
-import os
 import math
 
 import sbi
-from sbi.utils import process_prior
 from sbi import utils as utils
 from sbi.inference import SNLE, prepare_for_sbi, simulate_for_sbi
 from sbi.utils import process_prior
