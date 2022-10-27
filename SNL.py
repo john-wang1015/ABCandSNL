@@ -61,7 +61,7 @@ class CustomPriorDist(object):
         return log_probs.numpy() if self.return_numpy else log_probs
 
 class SNL(object):
-    def __init__(self, theta,n_samples,observation):
+    def __init__(self, theta, n_samples, observation):
         self.theta = theta
         self.n = n_samples
         self.observation = observation
